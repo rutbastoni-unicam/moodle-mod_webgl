@@ -479,7 +479,7 @@ function webgl_pluginfile($course, $cm, $context, $filearea, array $args, $force
         return false;
     }
 
-    send_stored_file($file, 0, 0, $forcedownload);
+    webgl_send_stored_file($file, 0, 0, $forcedownload);
 }
 
 /* Navigation API */
