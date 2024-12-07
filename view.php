@@ -51,6 +51,8 @@ $event = \mod_webgl\event\course_module_viewed::create(array(
 $event->add_record_snapshot('course', $PAGE->course);
 $event->add_record_snapshot($PAGE->cm->modname, $webgl);
 $event->trigger();
+$context = context_module::instance($cm->id);
+webgl_view($course, $cm, $context, $webgl);
 
 // Print the page header.
 
