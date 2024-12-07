@@ -58,11 +58,26 @@ function webgl_import_extract_upload_contents(stdClass $webgl, string $zipfilepa
         throw new moodle_exception('invalidcontent', 'mod_webgl');
     }
 
-    $indexfile = $dirname . 'index.html';
+    //--Rut - 27/11/2024 - fix for new webgl builds (index not in folder 'Build')
+    $indexfile = false;
+    foreach ($filelist as $filename => $value){
+        if(strpos($filename, 'index.html') !== false) {
+            $indexfile = $filename;
+            break;
+        }
+    }
+//    $indexfile = $dirname . 'index.html';
 
-    if (!in_array($indexfile, $filelist)) {
+//    if (!in_array($indexfile, $filelist)) {
+    if (!$indexfile) {
         // Missing required file.
         throw new moodle_exception('errorimport', 'mod_webgl');
+    }
+
+    $indexdir = dirname($indexfile);
+    $indexdirname = $indexdir === '.' ? '' : $indexdir;
+    if (!empty($indexdirname) && !str_ends_with($indexdirname, '/')) {
+        $indexdirname .= '/';
     }
 
     // Upload to S3.
@@ -81,7 +96,8 @@ function webgl_import_extract_upload_contents(stdClass $webgl, string $zipfilepa
         if (!$extractedfiles){
             throw new moodle_exception('invalidcontent','mod_webgl');
         }
-        $moodle_url = moodle_url::make_pluginfile_url($context->id,'mod_webgl','content',$webgl->id,'/'.$dirname,'index.html');
+//        $moodle_url = moodle_url::make_pluginfile_url($context->id,'mod_webgl','content',$webgl->id,'/'.$dirname,'index.html');
+        $moodle_url = moodle_url::make_pluginfile_url($context->id,'mod_webgl','content',$webgl->id,'/'.$indexdirname,'index.html');
         return [
             'index' => $moodle_url->out()
         ];
