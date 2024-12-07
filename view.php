@@ -61,7 +61,7 @@ $PAGE->set_title(format_string($webgl->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_cacheable(false);
 $PAGE->set_pagelayout('embedded');
-$context = context_course::instance($course->id);
+$PAGE->requires->js_call_amd('mod_webgl/unitygame', 'init');
 ?>
 
 <?php
