@@ -6,6 +6,8 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/messages/>.
+import {call as fetchMany} from 'core/ajax';
+import $ from 'jquery';
 
 /**
  * Handle progress game from Unity interface to Moodle
@@ -19,8 +21,22 @@ window.mod_webgl_plugin = {
 };
 
 export const init = () => {
-    const setGameLoaded = () => {
-        window.console.error('>>>WORK IN PROGRESS - THIS SHOULD SET THE UNITY GAME ACTIVITY AS VIEWED');
+    /**
+     * Call to internal API to set this game as viewed
+     */
+    const setGameLoaded = async () => {
+        const webglid = $('.webgl-iframe-content-loader').data('webgl');
+
+        const response = await fetchMany([{
+            methodname: 'mod_webgl_signal_game_loaded',
+            args: {'webglid': webglid}
+        }])[0];
+
+        if (!response) {
+            window.console.error('Error setting webgl ' + webglid + ' as viewed');
+        }
+        window.console.log(response);
+
     };
 
     const setGameProgress = (progressData) => {

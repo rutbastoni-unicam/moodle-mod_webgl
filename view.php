@@ -44,15 +44,8 @@ if ($id) {
 
 require_login($course, true, $cm);
 
-$event = \mod_webgl\event\course_module_viewed::create(array(
-    'objectid' => $PAGE->cm->instance,
-    'context' => $PAGE->context,
-));
-$event->add_record_snapshot('course', $PAGE->course);
-$event->add_record_snapshot($PAGE->cm->modname, $webgl);
-$event->trigger();
-$context = context_module::instance($cm->id);
-webgl_view($course, $cm, $context, $webgl);
+// Now it should be marked viewed from javascript, as soon as the Unity interface gets loaded
+//webgl_view($course, $cm, $context, $webgl);
 
 // Print the page header.
 
@@ -67,7 +60,7 @@ $PAGE->requires->js_call_amd('mod_webgl/unitygame', 'init');
 <?php
 echo $OUTPUT->header();
 $iframe = '
-<div class="webgl-iframe-content-loader">
+<div class="webgl-iframe-content-loader" data-webgl="' . $webgl->id . '">
 <iframe
 width="100%"
 height="100%"
