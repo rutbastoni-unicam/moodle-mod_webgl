@@ -102,4 +102,8 @@ $string['local_file_system'] = 'Moodle file system';
 
 $string['privacy:metadata'] = 'The mod_webgl plugin does not store any personal data.';
 
+$string['completionminimumscore'] = 'Achieve a minimum score';
+$string['completionlevels'] = 'Complete number of levels';
+$string['completionpuzzlesolved'] = 'Complete the puzzle of this game';
+
 // END: Fields in the admin form.

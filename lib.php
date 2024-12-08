@@ -52,8 +52,9 @@ function webgl_supports(string $feature): ?bool {
         case FEATURE_SHOW_DESCRIPTION:
         case FEATURE_MOD_INTRO:
         case FEATURE_COMPLETION_TRACKS_VIEWS:
-            return true;
+        case FEATURE_COMPLETION_HAS_RULES:
         case FEATURE_BACKUP_MOODLE2:
+            return true;
         case FEATURE_GRADE_HAS_GRADE:
             return false;
         default:
@@ -537,4 +538,42 @@ function webgl_view($course, $cm, $context, $webgl) {
     // Completion.
     $completion = new completion_info($course);
     $completion->set_module_viewed($cm);
+}
+
+/**
+ * Add a get_coursemodule_info function in case any webgl type wants to add 'extra' information
+ * for the course (see resource).
+ *
+ * Given a course_module object, this function returns any "extra" information that may be needed
+ * when printing this activity in a course listing.  See get_array_of_activities() in course/lib.php.
+ *
+ * @param stdClass $coursemodule The coursemodule object (record).
+ * @return cached_cm_info An object on information that the courses
+ *                        will know about (most noticeably, an icon).
+ */
+function webgl_get_coursemodule_info($coursemodule) {
+    global $DB;
+
+    $dbparams = ['id' => $coursemodule->instance];
+    $fields = 'id, name, intro, introformat, completionminimumscore, completionlevels, completionpuzzlesolved';
+    if (!$webgl = $DB->get_record('webgl', $dbparams, $fields)) {
+        return false;
+    }
+
+    $result = new cached_cm_info();
+    $result->name = $webgl->name;
+
+    if ($coursemodule->showdescription) {
+        // Convert intro to html. Do not filter cached version, filters run at display time.
+        $result->content = format_module_intro('webgl', $webgl, $coursemodule->id, false);
+    }
+
+    // Populate the custom completion rules as key => value pairs, but only if the completion mode is 'automatic'.
+    if ($coursemodule->completion == COMPLETION_TRACKING_AUTOMATIC) {
+        $result->customdata['customcompletionrules']['completionminimumscore'] = $webgl->completionminimumscore;
+        $result->customdata['customcompletionrules']['completionlevels'] = $webgl->completionlevels;
+        $result->customdata['customcompletionrules']['completionpuzzlesolved'] = $webgl->completionpuzzlesolved;
+    }
+
+    return $result;
 }

@@ -264,4 +264,99 @@ class mod_webgl_mod_form extends moodleform_mod {
         return $error;
     }
 
+    public function data_preprocessing(&$defaultvalues) {
+        parent::data_preprocessing($defaultvalues);
+
+        $suffix = $this->get_suffix();
+        $completionminimumscoreenabledel = 'completionminimumscoreenabled' . $suffix;
+        $completionminimumscoreel = 'completionminimumscore' . $suffix;
+        $completionlevelsenabledel = 'completionlevelsenabled' . $suffix;
+        $completionlevelselel = 'completionlevels' . $suffix;
+
+        // Set up the completion checkboxes which aren't part of standard data.
+        // We also make the default value (if you turn on the checkbox) for those
+        // numbers to be 1, this will not apply unless checkbox is ticked.
+        $defaultvalues[$completionminimumscoreenabledel] = !empty($defaultvalues[$completionminimumscoreel]) ? 1 : 0;
+        if (empty($defaultvalues[$completionminimumscoreel])) {
+            $defaultvalues[$completionminimumscoreel] = 100;
+        }
+        $defaultvalues[$completionlevelsenabledel] = !empty($defaultvalues[$completionlevelselel]) ? 1 : 0;
+        if (empty($defaultvalues[$completionlevelselel])) {
+            $defaultvalues[$completionlevelselel] = 1;
+        }
+
+    }
+
+
+    /**
+     * Add custom completion rules.
+     *
+     * @return array Array of string IDs of added items, empty array if none
+     */
+    public function add_completion_rules() {
+        $mform = $this->_form;
+
+        $suffix = $this->get_suffix();
+
+        $group = [];
+        $completionminimumscoreenabledel = 'completionminimumscoreenabled' . $suffix;
+        $group[] =& $mform->createElement('checkbox', $completionminimumscoreenabledel, '', get_string('completionminimumscore', 'webgl'));
+        $completionminimumscoreel = 'completionminimumscore' . $suffix;
+        $group[] =& $mform->createElement('text', $completionminimumscoreel, '', ['size' => 4]);
+        $mform->setType($completionminimumscoreel, PARAM_INT);
+        $completionminimumscoregroupel = 'completionminimumscoregroup' . $suffix;
+        $mform->addGroup($group, $completionminimumscoregroupel, '', ' ', false);
+        $mform->hideIf($completionminimumscoreel, $completionminimumscoreenabledel, 'notchecked');
+
+        $group = [];
+        $completionlevelsenabledel = 'completionlevelsenabled' . $suffix;
+        $group[] =& $mform->createElement(
+            'checkbox',
+            $completionlevelsenabledel,
+            '',
+            get_string('completionlevels', 'webgl')
+        );
+        $completionlevelsel = 'completionlevels' . $suffix;
+        $group[] =& $mform->createElement('text', $completionlevelsel, '', ['size' => 3]);
+        $mform->setType($completionlevelsel, PARAM_INT);
+        $completionlevelsgroupel = 'completionlevelsgroup' . $suffix;
+        $mform->addGroup($group, $completionlevelsgroupel, '', ' ', false);
+        $mform->hideIf($completionlevelsel, $completionlevelsenabledel, 'notchecked');
+
+        $completionpuzzlesolvedel = 'completionpuzzlesolved' . $suffix;
+        $mform->addElement('advcheckbox', $completionpuzzlesolvedel, '', get_string('completionpuzzlesolved', 'webgl'), array(), array(0, 1));
+
+        return [$completionminimumscoregroupel, $completionlevelsgroupel, $completionpuzzlesolvedel];
+    }
+
+    public function completion_rule_enabled($data) {
+        $suffix = $this->get_suffix();
+        return (!empty($data['completionminimumscoreenabled' . $suffix]) && $data['completionminimumscore' . $suffix] != 0) ||
+            (!empty($data['completionlevelsenabled' . $suffix]) && $data['completionlevels' . $suffix] != 0) ||
+            (!empty($data['completionpuzzlesolved' . $suffix]));
+    }
+
+    /**
+     * Allows module to modify the data returned by form get_data().
+     * This method is also called in the bulk activity completion form.
+     *
+     * Only available on moodleform_mod.
+     *
+     * @param stdClass $data the form data to be modified.
+     */
+    public function data_postprocessing($data) {
+        parent::data_postprocessing($data);
+        // Turn off completion settings if the checkboxes aren't ticked.
+        if (!empty($data->completionunlocked)) {
+            $suffix = $this->get_suffix();
+            $completion = $data->{'completion' . $suffix};
+            $autocompletion = !empty($completion) && $completion == COMPLETION_TRACKING_AUTOMATIC;
+            if (empty($data->{'completionminimumscoreenabled' . $suffix}) || !$autocompletion) {
+                $data->{'completionminimumscore' . $suffix} = 0;
+            }
+            if (empty($data->{'completionlevelsenabled' . $suffix}) || !$autocompletion) {
+                $data->{'completionlevels' . $suffix} = 0;
+            }
+        }
+    }
 }
