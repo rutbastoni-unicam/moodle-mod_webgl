@@ -55,7 +55,12 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_cacheable(false);
 $PAGE->set_pagelayout('embedded');
 $PAGE->requires->js_call_amd('mod_webgl/unitygame', 'init');
+
+$courseurl = new moodle_url('/course/view.php');
 ?>
+<form action="<?php echo $courseurl; ?>" method="get" id="mod_webgl_course_url">
+    <input type="hidden" name="id" value="<?php echo $course->id; ?>">
+</form>
 
 <?php
 echo $OUTPUT->header();

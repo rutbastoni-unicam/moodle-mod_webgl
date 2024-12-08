@@ -31,5 +31,14 @@ $functions = array(
         'type' => 'write',
         'ajax'        => true,
         'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
+    ),
+    'mod_webgl_signal_game_progress' => array(
+        'classname' => 'mod_webgl_external',
+        'methodname' => 'signal_game_progress',
+        'classpath' => 'mod/webgl/externallib.php',
+        'description' => 'Signal the game progress achieved by the current user',
+        'type' => 'write',
+        'ajax'        => true,
+        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     )
 );
