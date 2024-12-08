@@ -51,25 +51,80 @@ defined('MOODLE_INTERNAL') || die;
  * @return bool
  */
 function xmldb_webgl_upgrade($oldversion) {
-    global $CFG;
+    global $CFG, $DB;
 
-    // Automatically generated Moodle v3.6.0 release upgrade line.
-    // Put any upgrade step following this.
+    $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
-    // Automatically generated Moodle v3.7.0 release upgrade line.
-    // Put any upgrade step following this.
+    if ($oldversion < 2024120701) {
 
-    // Automatically generated Moodle v3.8.0 release upgrade line.
-    // Put any upgrade step following this.
+        // Adding fields to table webgl.
+        $table = new xmldb_table('webgl');
 
-    // Automatically generated Moodle v3.9.0 release upgrade line.
-    // Put any upgrade step following this.
+        $field = new xmldb_field('completionminimumscore', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'grade');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
 
-    // Automatically generated Moodle v3.10.0 release upgrade line.
-    // Put any upgrade step following this.
+        $field = new xmldb_field('completionlevels', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'completionminimumscore');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
 
-    // Automatically generated Moodle v3.11.0 release upgrade line.
-    // Put any upgrade step following this.
+        $field = new xmldb_field('completionpuzzlesolved', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'completionlevels');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Define table webgl_achievements to be created.
+        $table = new xmldb_table('webgl_achievements');
+
+        // Adding fields to table webgl_achievements.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('webgl', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        // Adding keys to table webgl_achievements.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('webgl', XMLDB_KEY_FOREIGN, ['webgl'], 'webgl', ['id']);
+        $table->add_key('userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+
+        // Adding indexes to table webgl_achievements.
+        $table->add_index('webgluserachievements', XMLDB_INDEX_UNIQUE, ['webgl', 'userid']);
+
+        // Conditionally launch create table for webgl_achievements.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+
+        // Webgl savepoint reached.
+        upgrade_mod_savepoint(true, 2024120701, 'webgl');
+    }
+
+    if ($oldversion < 2024120702) {
+        // Adding fields to table webgl_achievements.
+        $table = new xmldb_table('webgl_achievements');
+
+        $field = new xmldb_field('score', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'userid');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('completedlevels', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0', 'score');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('solvedpuzzle', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'completedlevels');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Webgl savepoint reached.
+        upgrade_mod_savepoint(true, 2024120702, 'webgl');
+    }
 
     return true;
 }

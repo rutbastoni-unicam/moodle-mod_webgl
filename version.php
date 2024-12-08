@@ -24,9 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2021100701; // The current version (Date: YYYYMMDDXX).
+$plugin->version = 2024120702; // The current version (Date: YYYYMMDDXX).
 
-$plugin->requires = 2019111806; // Requires this Moodle version.
+$plugin->requires = 2021051700.00; // Requires this Moodle version.
 
 $plugin->component = 'mod_webgl'; // Full name of the plugin (used for diagnostics).
 
@@ -34,6 +34,6 @@ $plugin->dependencies = [
     'repository_s3' => 2019111800,
 ];
 
-$plugin->release = 'v-1.0.2';
+$plugin->release = 'v-2.0.0rc';
 
-$plugin->maturity = MATURITY_STABLE;
+$plugin->maturity = MATURITY_RC;
