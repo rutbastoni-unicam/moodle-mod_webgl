@@ -357,6 +357,9 @@ class mod_webgl_mod_form extends moodleform_mod {
             if (empty($data->{'completionlevelsenabled' . $suffix}) || !$autocompletion) {
                 $data->{'completionlevels' . $suffix} = 0;
             }
+            if (!$autocompletion) {
+                $data->{'completionpuzzlesolved' . $suffix} = 0;
+            }
         }
     }
 }

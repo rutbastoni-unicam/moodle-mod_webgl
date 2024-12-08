@@ -106,4 +106,7 @@ $string['completionminimumscore'] = 'Achieve a minimum score';
 $string['completionlevels'] = 'Complete number of levels';
 $string['completionpuzzlesolved'] = 'Complete the puzzle of this game';
 
+$string['completiondetail:minimumscore'] = 'Achieve minimum score: {$a}';
+$string['completiondetail:levels'] = 'Complete number of levels: {$a}';
+$string['completiondetail:puzzlesolved'] = 'Complete the puzzle of this game';
 // END: Fields in the admin form.
