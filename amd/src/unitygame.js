@@ -17,7 +17,7 @@ import $ from 'jquery';
 window.mod_webgl_plugin = {
     initted: false,
     trackGameViewed: () => {},
-    trackGameProgress: (progressData) => {}
+    trackGameProgress: () => {}
 };
 
 /**
@@ -74,9 +74,36 @@ export const init = () => {
 
     };
 
+    const checkWebglIframeLoaded = () => {
+        const unityFrame = $('.webgl-iframe-content-loader iframe');
+        if(unityFrame.length < 1) {
+            // No proper Unity framework installed
+            return;
+        }
+
+        const unityLoadingBar = unityFrame[0].contentDocument.querySelector("#unity-loading-bar");
+        if (!unityLoadingBar) {
+            // No proper Unity framework installed
+            return;
+        }
+
+        const loadingBarStyle = unityLoadingBar.style.display;
+
+        // Unity loading bar still visible - game still not played
+        if (loadingBarStyle != 'none') {
+            setTimeout(checkWebglIframeLoaded, 250);
+            return;
+        }
+
+        // Unity game loaded - track activity as viewed
+        setGameLoaded();
+    };
+
     window.mod_webgl_plugin.trackGameViewed = setGameLoaded;
     window.mod_webgl_plugin.trackGameProgress = setGameProgress;
 
-    window.console.error('>>>unityGame setup ready');
     window.mod_webgl_plugin.initted = true;
+
+    // Autodetect game loaded
+    $(document).ready(checkWebglIframeLoaded);
 };
