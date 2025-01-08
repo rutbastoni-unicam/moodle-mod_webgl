@@ -1,17 +1,28 @@
-.path-mod-webgl body {
+.path-mod-webgl {
     display: block;
     margin: 0 !important;
 }
 
+.path-mod-webgl #page {
+    height: 100%;
+}
+
+.path-mod-webgl #page .embedded-main {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.path-mod-webgl #page .embedded-main div[role="main"] {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
 .path-mod-webgl .webgl-iframe-content-loader {
     background: #fff;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
+    flex: 1;
     width: 100%;
-    height: 100%;
 }
 
 .path-mod-webgl .iframe {

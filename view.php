@@ -55,6 +55,7 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_cacheable(false);
 $PAGE->set_pagelayout('embedded');
 $PAGE->requires->js_call_amd('mod_webgl/unitygame', 'init');
+echo $OUTPUT->header();
 
 $courseurl = new moodle_url('/course/view.php');
 ?>
@@ -63,7 +64,7 @@ $courseurl = new moodle_url('/course/view.php');
 </form>
 
 <?php
-echo $OUTPUT->header();
+
 $iframe = '
 <div class="webgl-iframe-content-loader" data-webgl="' . $webgl->id . '">
 <iframe
@@ -130,10 +131,9 @@ if ($position < ($nummods - 1)) {
 
 $activitynav = new activity_navigation($prevmod, $nextmod, $activitylist);
 $renderer = $PAGE->get_renderer('core', 'course');
+echo '</div>';
 ?>
-    <div onclick="history.back()" style="position: absolute;
-        left: 0;width:100%;
-        height:30px;bottom: 0;
+    <div onclick="history.back()" style="width:100%;
         background: #fff;
         padding: 12px;color: #424242;
         text-decoration: none;
@@ -142,5 +142,4 @@ $renderer = $PAGE->get_renderer('core', 'course');
         <?php echo $renderer->render($activitynav); ?>
     </div>
 <?php
-echo '</div>';
 echo $OUTPUT->footer();
