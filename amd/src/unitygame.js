@@ -7,6 +7,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/messages/>.
 import {call as fetchMany} from 'core/ajax';
+import Templates from 'core/templates';
 import $ from 'jquery';
 
 /**
@@ -28,6 +29,16 @@ window.mod_webgl_plugin = {
  */
 
 export const init = () => {
+    const handleCompletionData = async (completiondata) => {
+        // Replace activity completion info
+        const activityInfosBlock = $('.activity-information');
+        if (activityInfosBlock.length) {
+            const renderObject = await Templates.renderForPromise('core_course/activity_info', completiondata);
+            await Templates.replaceNode(activityInfosBlock[0], renderObject.html, renderObject.js);
+        }
+
+    };
+
     /**
      * Call to internal API to set this game as viewed
      */
@@ -42,6 +53,8 @@ export const init = () => {
         if (!response) {
             window.console.error('Error setting webgl ' + webglid + ' as viewed');
         }
+
+        handleCompletionData(response.completiondata);
         window.console.log(response);
 
     };
@@ -105,5 +118,8 @@ export const init = () => {
     window.mod_webgl_plugin.initted = true;
 
     // Autodetect game loaded
-    $(document).ready(checkWebglIframeLoaded);
+    $(document).ready(() => {
+        checkWebglIframeLoaded();
+    });
+
 };

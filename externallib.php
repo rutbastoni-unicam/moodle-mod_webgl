@@ -16,6 +16,8 @@
 
 use core_external\external_api;
 use core_external\external_function_parameters;
+use core_external\external_multiple_structure;
+use core_external\external_single_structure;
 use core_external\external_value;
 
 /**
@@ -26,6 +28,19 @@ use core_external\external_value;
  */
 class mod_webgl_external extends external_api
 {
+    private static function get_completion_info($cm)
+    {
+        global $PAGE, $USER;
+        $completiondetails = \core_completion\cm_completion_details::get_instance($cm, $USER->id);
+        $activitydates = \core\activity_dates::get_dates_for_module($cm, $USER->id);
+
+        $activitycompletion = new \core_course\output\activity_completion($cm, $completiondetails);
+        $activitycompletiondata = (array) $activitycompletion->export_for_template($PAGE->get_renderer('core'));
+        $activitydates = new \core_course\output\activity_dates($activitydates);
+        $activitydatesdata = (array) $activitydates->export_for_template($PAGE->get_renderer('core'));
+        $data = array_merge($activitycompletiondata, $activitydatesdata);
+        return $data;
+    }
     /**
      * Mark this game loaded and seen by the current user
      *
@@ -48,13 +63,17 @@ class mod_webgl_external extends external_api
         $context = context_module::instance($cm->id);
         self::validate_context($context);
 
+        course_modinfo::purge_course_cache($course->id);
         // Trigger course_module_viewed event.
         webgl_view($course, $cm, $context, $webgl);
 
 //        // Get achievements record
 //        $webgl_achievement = $DB->get_record('webgl_achievements', ['webgl' => $params['webglid'], 'userid' => $USER->id]);
+        course_modinfo::purge_course_cache($course->id);
+        list($courseBis, $cmBis) = get_course_and_cm_from_instance($webgl, 'webgl');
+        $completiondata = self::get_completion_info($cmBis);
 
-        return true;
+        return ['gameloadtracked' => true, 'completiondata' => $completiondata];
     }
 
     /**
@@ -76,7 +95,41 @@ class mod_webgl_external extends external_api
      * @return external_value
      */
     public static function signal_game_loaded_returns() {
-        return new external_value(PARAM_BOOL, 'True if the game was successfully marked as loaded by the use');
+        return new external_single_structure([
+            'gameloadtracked' => new external_value(PARAM_BOOL, 'True if the game was successfully marked as loaded by the use'),
+            'completiondata' => new external_single_structure([
+                'cmid' => new external_value(PARAM_INT, 'Cm info id'),
+                'activityname' => new external_value(PARAM_RAW, 'Activity name'),
+                'uservisible' => new external_value(PARAM_BOOL, 'True if user is visible'),
+                'hascompletion' => new external_value(PARAM_BOOL, 'True if has completion'),
+                'isautomatic' => new external_value(PARAM_BOOL, 'True if it is automatic'),
+                'ismanual' => new external_value(PARAM_BOOL, 'True if it is manual'),
+                'showmanualcompletion' => new external_value(PARAM_BOOL, 'True if it shows manual completion'),
+                'istrackeduser' => new external_value(PARAM_BOOL, 'True if it is a tracked user'),
+                'overallcomplete' => new external_value(PARAM_BOOL, 'True if it is overall complete'),
+                'overallincomplete' => new external_value(PARAM_BOOL, 'True if it is overall incomplete'),
+                'overrideby' => new external_value(PARAM_RAW, 'Overridden by'),
+                'accessibledescription' => new external_value(PARAM_RAW, 'Accessible description'),
+                'hasdates' => new external_value(PARAM_BOOL, 'True if it has dates'),
+                'completiondetails' => new external_multiple_structure(
+                    new external_single_structure([
+                        'description' => new external_value(PARAM_RAW, 'Description'),
+                        'key' => new external_value(PARAM_RAW, 'Key'),
+                        'statuscomplete' => new external_value(PARAM_BOOL, 'True if it is status complete'),
+                        'statuscompletefail' => new external_value(PARAM_BOOL, 'True if it is status complete fail'),
+                        'statuscompletepass' => new external_value(PARAM_BOOL, 'True if it is status complete pass'),
+                        'statusincomplete' => new external_value(PARAM_BOOL, 'True if it is status incomplete'),
+                    ])
+                ),
+                'activitydates' => new external_multiple_structure(
+                    new external_single_structure([
+                        'relativeto' => new external_value(PARAM_INT, 'Date relative to'),
+                        'timestamp' => new external_value(PARAM_INT, 'Timestamp'),
+                        'datestring' => new external_value(PARAM_RAW, 'Date formatted as string')
+                    ])
+                )
+            ])
+        ]);
     }
 
     public static function signal_game_progress($webglid, $score, $completedlevels, $puzzlesolved) {
