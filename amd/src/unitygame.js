@@ -172,4 +172,24 @@ export const init = () => {
 
     // Autodetect game loaded
     checkWebglIframeLoaded();
+
+    // Listen for events triggered inside the Webgl game
+    const unityFrame = $('.webgl-iframe-content-loader iframe');
+    if(unityFrame.length) {
+        const iframe = unityFrame[0];
+        iframe.addEventListener('load', () => {
+            const iframeWindow = iframe.contentWindow;
+
+            iframeWindow.addEventListener("gameLoaded", () => {
+                window.console.log("gameLoaded event received from Webgl frame");
+                setGameLoaded();
+            });
+
+            iframeWindow.addEventListener("gameProgress", (event) => {
+                window.console.log("gameProgress event received from Webgl frame:", event.detail);
+                // Gestisci il progresso del gioco qui
+                setGameProgress(event.detail);
+            });
+        });
+    }
 };
