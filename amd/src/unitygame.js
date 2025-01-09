@@ -11,6 +11,7 @@ import ModalEvents from 'core/modal_events';
 import ModalSaveCancel from 'core/modal_save_cancel';
 import {get_string as getString} from 'core/str';
 import Templates from 'core/templates';
+import * as CourseEvents from 'core_course/events';
 import $ from 'jquery';
 
 /**
@@ -32,6 +33,26 @@ window.mod_webgl_plugin = {
  */
 
 export const init = () => {
+    const showGameCompleteDialog = async () => {
+        const modalbacktocourse = await ModalSaveCancel.create({
+            title: getString('gamecompletedialog', 'mod_webgl'),
+            body: getString('gamecompletedialogbody', 'mod_webgl'),
+            buttons: {
+                cancel: getString('gamecompletedialogcancel', 'mod_webgl'),
+                save: getString('gamecompletedialogsave', 'mod_webgl')
+            }
+        });
+
+        // Remove default click listener outside the modal that makes it close;
+        // we want the user explicitly click a button to confirm his choice
+        modalbacktocourse.getRoot().off('click');
+
+        modalbacktocourse.getRoot().on(ModalEvents.save, () => {
+            $('#mod_webgl_course_url').submit();
+        });
+        modalbacktocourse.show();
+    };
+
     const handleCompletionData = async (completiondata) => {
         // Replace activity completion info
         const activityInfosBlock = $('.activity-information');
@@ -41,25 +62,7 @@ export const init = () => {
         }
 
         if (completiondata.overallcomplete) {
-            window.console.error('should show complete dialog');
-
-            const modalbacktocourse = await ModalSaveCancel.create({
-                title: getString('gamecompletedialog', 'mod_webgl'),
-                body: getString('gamecompletedialogbody', 'mod_webgl'),
-                buttons: {
-                    cancel: getString('gamecompletedialogcancel', 'mod_webgl'),
-                    save: getString('gamecompletedialogsave', 'mod_webgl')
-                }
-            });
-
-            // Remove default click listener outside the modal that makes it close;
-            // we want the user explicitly click a button to confirm his choice
-            modalbacktocourse.getRoot().off('click');
-
-            modalbacktocourse.getRoot().on(ModalEvents.save, () => {
-                $('#mod_webgl_course_url').submit();
-            });
-            modalbacktocourse.show();
+            showGameCompleteDialog();
         }
     };
 
@@ -115,13 +118,15 @@ export const init = () => {
     const checkWebglIframeLoaded = () => {
         const unityFrame = $('.webgl-iframe-content-loader iframe');
         if(unityFrame.length < 1) {
-            // No proper Unity framework installed
+            // No proper Unity framework installed - maybe page is still loading
+            setTimeout(checkWebglIframeLoaded, 250);
             return;
         }
 
         const unityLoadingBar = unityFrame[0].contentDocument.querySelector("#unity-loading-bar");
         if (!unityLoadingBar) {
-            // No proper Unity framework installed
+            // No proper Unity framework installed - maybe page is still loading
+            setTimeout(checkWebglIframeLoaded, 250);
             return;
         }
 
@@ -134,6 +139,7 @@ export const init = () => {
         }
 
         // Unity game loaded - track activity as viewed
+        window.console.error('Game loaded, track it');
         setGameLoaded();
     };
 
@@ -141,11 +147,6 @@ export const init = () => {
     window.mod_webgl_plugin.trackGameProgress = setGameProgress;
 
     window.mod_webgl_plugin.initted = true;
-
-    // Autodetect game loaded
-    $(document).ready(() => {
-        checkWebglIframeLoaded();
-    });
 
     // Listen for events triggered by Webgl components (alternative to mod_webgl_plugin API)
     window.addEventListener("gameLoaded", () => {
@@ -158,4 +159,17 @@ export const init = () => {
         // Gestisci il progresso del gioco qui
         setGameProgress(event.detail);
     });
+
+    // Listen for toggled manual completion states of activities.
+    document.addEventListener(CourseEvents.manualCompletionToggled, (e) => {
+        const withAvailability = parseInt(e.detail.withAvailability);
+        if (!withAvailability && e.detail.completed) {
+            // In case of availability params, this state is already handled by core
+            // Otherwise, if the course is flagged as completed, it shows the game completed dialog
+            showGameCompleteDialog();
+        }
+    });
+
+    // Autodetect game loaded
+    checkWebglIframeLoaded();
 };
