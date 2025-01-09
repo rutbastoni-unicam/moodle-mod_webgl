@@ -147,4 +147,15 @@ export const init = () => {
         checkWebglIframeLoaded();
     });
 
+    // Listen for events triggered by Webgl components (alternative to mod_webgl_plugin API)
+    window.addEventListener("gameLoaded", () => {
+        window.console.log("gameLoaded event received");
+        setGameLoaded();
+    });
+
+    window.addEventListener("gameProgress", (event) => {
+        window.console.log("gameProgress event received:", event.detail);
+        // Gestisci il progresso del gioco qui
+        setGameProgress(event.detail);
+    });
 };

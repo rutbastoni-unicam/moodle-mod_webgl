@@ -176,7 +176,7 @@ class mod_webgl_external extends external_api
             $webgl_achievement->completedlevels = $params['completedlevels'];
         }
         if ($params['puzzlesolved'] > 0) {
-            $webgl_achievement->puzzlesolved = $params['puzzlesolved'];
+            $webgl_achievement->solvedpuzzle = $params['puzzlesolved'];
         }
 
         $output = false;
