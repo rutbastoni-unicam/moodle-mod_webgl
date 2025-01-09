@@ -76,10 +76,10 @@ export const init = () => {
 
         if (!response) {
             window.console.error('Error setting webgl ' + webglid + ' as viewed');
+        } else {
+            handleCompletionData(response.completiondata);
+            window.console.log(response);
         }
-
-        handleCompletionData(response.completiondata);
-        window.console.log(response);
 
     };
 
@@ -103,10 +103,11 @@ export const init = () => {
             args: {'webglid': webglid, 'score': score, 'completedlevels': completedLevels, 'puzzlesolved': puzzleSolved}
         }])[0];
 
-        window.console.log('completed game? ' + response);
-        if (response) {
-            // Completed activity so the user can return to the course
-            $('#mod_webgl_course_url').submit();
+        if (!response) {
+            window.console.error('Error setting webgl ' + webglid + ' progress data');
+        } else {
+            handleCompletionData(response.completiondata);
+            window.console.log(response);
         }
 
     };

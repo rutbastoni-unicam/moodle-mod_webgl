@@ -93,13 +93,32 @@ class custom_completion extends activity_custom_completion
      */
     public function get_custom_rule_descriptions(): array
     {
+        global $DB;
+
         $completionminimumscore = $this->cm->customdata['customcompletionrules']['completionminimumscore'] ?? 0;
         $completionlevels = $this->cm->customdata['customcompletionrules']['completionlevels'] ?? 0;
         $completionpuzzlesolved = $this->cm->customdata['customcompletionrules']['completionpuzzlesolved'] ?? 0;
 
+        $userscore = 0;
+        $userlevels = 0;
+
+        $userid = $this->userid;
+        $webglid = $this->cm->instance;
+
+        if (!$webgl = $DB->get_record('webgl', ['id' => $webglid])) {
+            throw new \moodle_exception('Unable to find webgl with id ' . $webglid);
+        }
+
+        $webglachievementsparams = ['userid' => $userid, 'webgl' => $webglid];
+        $webglachievement = $DB->get_record('webgl_achievements', $webglachievementsparams);
+        if ($webglachievement) {
+            $userscore = $webglachievement->score;
+            $userlevels = $webglachievement->completedlevels;
+        }
+
         return [
-            'completionminimumscore' => get_string('completiondetail:minimumscore', 'webgl', $completionminimumscore),
-            'completionlevels' => get_string('completiondetail:levels', 'webgl', $completionlevels),
+            'completionminimumscore' => get_string('completiondetail:minimumscore', 'webgl', $userscore . '/' . $completionminimumscore),
+            'completionlevels' => get_string('completiondetail:levels', 'webgl', $userlevels . '/' . $completionlevels),
             'completionpuzzlesolved' => get_string('completiondetail:puzzlesolved', 'webgl', $completionpuzzlesolved),
         ];
     }

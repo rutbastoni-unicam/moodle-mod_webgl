@@ -63,7 +63,6 @@ class mod_webgl_external extends external_api
         $context = context_module::instance($cm->id);
         self::validate_context($context);
 
-        course_modinfo::purge_course_cache($course->id);
         // Trigger course_module_viewed event.
         webgl_view($course, $cm, $context, $webgl);
 
@@ -207,10 +206,12 @@ class mod_webgl_external extends external_api
             $completion->update_state($cm, COMPLETION_COMPLETE);
         }
 
-        //Return true if, with this action, the activity can be considered complete
-        $updatedcompletion = $completion->get_data($cm, false);
+        // Get achievements infos
+        course_modinfo::purge_course_cache($course->id);
+        list($courseBis, $cmBis) = get_course_and_cm_from_instance($webgl, 'webgl');
+        $completiondata = self::get_completion_info($cmBis);
 
-        return (bool)$updatedcompletion->completionstate  == COMPLETION_COMPLETE;
+        return ['gameprogresstracked' => true, 'completiondata' => $completiondata];
     }
 
     /**
@@ -235,6 +236,40 @@ class mod_webgl_external extends external_api
      * @return external_value
      */
     public static function signal_game_progress_returns() {
-        return new external_value(PARAM_BOOL, 'True if the game progress was successfully registered');
+        return new external_single_structure([
+            'gameprogresstracked' => new external_value(PARAM_BOOL, 'True if the game progress was successfully registered'),
+            'completiondata' => new external_single_structure([
+                'cmid' => new external_value(PARAM_INT, 'Cm info id'),
+                'activityname' => new external_value(PARAM_RAW, 'Activity name'),
+                'uservisible' => new external_value(PARAM_BOOL, 'True if user is visible'),
+                'hascompletion' => new external_value(PARAM_BOOL, 'True if has completion'),
+                'isautomatic' => new external_value(PARAM_BOOL, 'True if it is automatic'),
+                'ismanual' => new external_value(PARAM_BOOL, 'True if it is manual'),
+                'showmanualcompletion' => new external_value(PARAM_BOOL, 'True if it shows manual completion'),
+                'istrackeduser' => new external_value(PARAM_BOOL, 'True if it is a tracked user'),
+                'overallcomplete' => new external_value(PARAM_BOOL, 'True if it is overall complete'),
+                'overallincomplete' => new external_value(PARAM_BOOL, 'True if it is overall incomplete'),
+                'overrideby' => new external_value(PARAM_RAW, 'Overridden by'),
+                'accessibledescription' => new external_value(PARAM_RAW, 'Accessible description'),
+                'hasdates' => new external_value(PARAM_BOOL, 'True if it has dates'),
+                'completiondetails' => new external_multiple_structure(
+                    new external_single_structure([
+                        'description' => new external_value(PARAM_RAW, 'Description'),
+                        'key' => new external_value(PARAM_RAW, 'Key'),
+                        'statuscomplete' => new external_value(PARAM_BOOL, 'True if it is status complete'),
+                        'statuscompletefail' => new external_value(PARAM_BOOL, 'True if it is status complete fail'),
+                        'statuscompletepass' => new external_value(PARAM_BOOL, 'True if it is status complete pass'),
+                        'statusincomplete' => new external_value(PARAM_BOOL, 'True if it is status incomplete'),
+                    ])
+                ),
+                'activitydates' => new external_multiple_structure(
+                    new external_single_structure([
+                        'relativeto' => new external_value(PARAM_INT, 'Date relative to'),
+                        'timestamp' => new external_value(PARAM_INT, 'Timestamp'),
+                        'datestring' => new external_value(PARAM_RAW, 'Date formatted as string')
+                    ])
+                )
+            ])
+        ]);
     }
 }
