@@ -80,6 +80,9 @@ $modules = get_fast_modinfo($course->id)->get_cms();
 // Put the modules into an array in order by the position they are shown in the course.
 $mods = [];
 $activitylist = [];
+
+$sectionnum = 0;
+
 foreach ($modules as $module) {
     // Only add activities the user can access, aren't in stealth mode and have a url (eg. mod_label does not).
     if (!$module->uservisible || $module->is_stealth() || empty($module->url)) {
@@ -89,6 +92,7 @@ foreach ($modules as $module) {
 
     // No need to add the current module to the list for the activity dropdown menu.
     if ($module->id == $cm->id) {
+        $sectionnum = $module->sectionnum;
         continue;
     }
     // Module name.
@@ -103,12 +107,16 @@ foreach ($modules as $module) {
     $activitylist[$linkurl->out(false)] = $modname;
 }
 
+// Add back url to course and right section
+$sectionurl = (new moodle_url('/course/view.php', ['id' => $course->id]))->out(false) . '#section-' . $sectionnum;
+// Prepend di un elemento con una chiave
+$activitylist = [$sectionurl => get_string('gamebacktosection', 'webgl')] + $activitylist;
 $nummods = count($mods);
 
 // If there is only one mod then do nothing.
-if ($nummods == 1) {
-    return '';
-}
+//if ($nummods == 1) {
+//    return '';
+//}
 
 // Get an array of just the course module ids used to get the cmid value based on their position in the course.
 $modids = array_keys($mods);
@@ -133,7 +141,7 @@ $activitynav = new activity_navigation($prevmod, $nextmod, $activitylist);
 $renderer = $PAGE->get_renderer('core', 'course');
 echo '</div>';
 ?>
-    <div onclick="history.back()" style="width:100%;
+    <div style="width:100%;
         background: #fff;
         padding: 12px;color: #424242;
         text-decoration: none;

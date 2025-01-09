@@ -101,6 +101,7 @@ $string['storage'] = 'Storage details';
 $string['local_file_system'] = 'Moodle file system';
 
 $string['privacy:metadata'] = 'The mod_webgl plugin does not store any personal data.';
+// END: Fields in the admin form.
 
 $string['completionminimumscore'] = 'Achieve a minimum score';
 $string['completionlevels'] = 'Complete number of levels';
@@ -115,4 +116,5 @@ $string['gamecompletedialog'] = 'Game complete';
 $string['gamecompletedialogbody'] = 'You finished the game! Do you want to go back to the course?';
 $string['gamecompletedialogsave'] = 'Go back to course';
 $string['gamecompletedialogcancel'] = 'Continue to play';
-// END: Fields in the admin form.
+
+$string['gamebacktosection'] = 'Back to course';
