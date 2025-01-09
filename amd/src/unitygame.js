@@ -7,6 +7,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/messages/>.
 import {call as fetchMany} from 'core/ajax';
+import ModalEvents from 'core/modal_events';
+import ModalSaveCancel from 'core/modal_save_cancel';
+import {get_string as getString} from 'core/str';
 import Templates from 'core/templates';
 import $ from 'jquery';
 
@@ -37,6 +40,27 @@ export const init = () => {
             await Templates.replaceNode(activityInfosBlock[0], renderObject.html, renderObject.js);
         }
 
+        if (completiondata.overallcomplete) {
+            window.console.error('should show complete dialog');
+
+            const modalbacktocourse = await ModalSaveCancel.create({
+                title: getString('gamecompletedialog', 'mod_webgl'),
+                body: getString('gamecompletedialogbody', 'mod_webgl'),
+                buttons: {
+                    cancel: getString('gamecompletedialogcancel', 'mod_webgl'),
+                    save: getString('gamecompletedialogsave', 'mod_webgl')
+                }
+            });
+
+            // Remove default click listener outside the modal that makes it close;
+            // we want the user explicitly click a button to confirm his choice
+            modalbacktocourse.getRoot().off('click');
+
+            modalbacktocourse.getRoot().on(ModalEvents.save, () => {
+                $('#mod_webgl_course_url').submit();
+            });
+            modalbacktocourse.show();
+        }
     };
 
     /**

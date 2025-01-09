@@ -110,4 +110,9 @@ $string['completiondetail:minimumscore'] = 'Achieve minimum score: {$a}';
 $string['completiondetail:levels'] = 'Complete number of levels: {$a}';
 $string['completiondetail:puzzlesolved'] = 'Complete the puzzle of this game';
 $string['gameprogresstracked'] = 'Game achievements tracked';
+
+$string['gamecompletedialog'] = 'Game complete';
+$string['gamecompletedialogbody'] = 'You finished the game! Do you want to go back to the course?';
+$string['gamecompletedialogsave'] = 'Go back to course';
+$string['gamecompletedialogcancel'] = 'Continue to play';
 // END: Fields in the admin form.
