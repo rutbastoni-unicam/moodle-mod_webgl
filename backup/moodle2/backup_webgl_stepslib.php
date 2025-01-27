@@ -37,7 +37,7 @@ class backup_webgl_activity_structure_step extends backup_activity_structure_ste
 
         // Define each element separated
 
-        $webgl = new backup_nested_element('forum', array('id'), array(
+        $webgl = new backup_nested_element('webgl', array('id'), array(
             'name', 'intro', 'introformat', 'webgl_file', 'storage_engine',
             'account_name', 'account_key', 'container_name', 'access_key',
             'secret_key', 'endpoint', 'bucket_name', 'cloudfront_url',
@@ -69,15 +69,10 @@ class backup_webgl_activity_structure_step extends backup_activity_structure_ste
         }
 
         // Define id annotations
-        //  TODO ensure there are no linked items to annotate
-//        $webgl->annotate_ids('scale', 'scale');
+        $achievement->annotate_ids('user', 'userid');
 
-        // Define file annotations
-        // TODO verify file annotations to do
-//        $forum->annotate_files('mod_forum', 'intro', null); // This file area hasn't itemid
-//
-//        $post->annotate_files('mod_forum', 'post', 'id');
-//        $post->annotate_files('mod_forum', 'attachment', 'id');
+        // Define file annotations (files to restore)
+        $webgl->annotate_files('mod_webgl', 'content', null);
 
         // Return the root element (webgl), wrapped into standard activity structure
         return $this->prepare_activity_structure($webgl);
